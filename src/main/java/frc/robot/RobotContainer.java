@@ -10,10 +10,12 @@ import frc.robot.util.SnailController;
 import java.util.ArrayList;
 
 import frc.robot.commands.Arm.ArmManualCommand;
+import frc.robot.commands.Elevator.ElevatorManualCommand;
 import frc.robot.commands.RollerIntake.IntakeEjectingCommand;
 import frc.robot.commands.RollerIntake.IntakeIntakingCommand;
 import frc.robot.commands.RollerIntake.IntakeNeutralCommand;
 import frc.robot.subsystems.Arm;
+import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.RollerIntake;
 
 import static frc.robot.Constants.ElectricalLayout.CONTROLLER_DRIVER_ID;
@@ -36,6 +38,7 @@ public class RobotContainer {
     // Subsystems
     private RollerIntake rollerIntake;
     private Arm arm;
+    private Elevator elevator;
 
     // idk what this is
     private Notifier updateNotifier;
@@ -75,9 +78,16 @@ public class RobotContainer {
             return operatorController.getLeftY();
         }));
 
+        // Elevator
+        elevator = new Elevator();
+        elevator.setDefaultCommand(new ElevatorManualCommand(elevator, () -> {
+            return operatorController.getRightY();
+        }));
+
         subsystems = new ArrayList<>();
         subsystems.add(rollerIntake);
         subsystems.add(arm);
+        subsystems.add(elevator);
         // add each of the subsystems to the arraylist here
     }
 

@@ -35,7 +35,7 @@ public final class Constants {
     }
     
     public static class Elevator {
-        public final static int INTAKE_MOTOR_ID = 0;
+        public final static int ELEVATOR_MOTOR_ID = 0;
         public final static int CURRENT_LIMIT = 25;
         public final static double INTAKE_SPEED = 1.0;
         public final static double EJECT_SPEED = -1.0;

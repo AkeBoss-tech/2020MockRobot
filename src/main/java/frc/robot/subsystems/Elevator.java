@@ -7,10 +7,40 @@ import frc.robot.Constants;
 
 public class Elevator extends SnailSubsystem {
 
+    public enum States {
+        Manual,
+        Autonomous
+    }
+
+    private CANSparkMax elevatorMotor;
+    private States state;
+    private double speed = 0;
+
+    public Elevator() {
+        // Setting up the motor
+        // Our Elevator has only one motor i think
+        elevatorMotor = new CANSparkMax(Constants.Elevator.ELEVATOR_MOTOR_ID, MotorType.kBrushless);
+        elevatorMotor.restoreFactoryDefaults();
+        elevatorMotor.setIdleMode(IdleMode.kBrake);
+        elevatorMotor.setSmartCurrentLimit(Constants.Elevator.CURRENT_LIMIT);
+
+        state = States.Manual; // Probably should change to Autonomous later
+    }
+
     @Override
     public void update() {
-        // TODO Auto-generated method stub
+        switch (state) {
+            case Manual:
+                elevatorMotor.set(speed);
+                break;
+            case Autonomous:
+                break;
+        }
+    }
 
+    public void setSpeed(double _speed) {
+        speed = _speed;
+        state = States.Manual;
     }
 
     @Override
