@@ -29,6 +29,19 @@ public final class Constants {
         public final static double NEUTRAL_SPEED = 0.0;
     }
 
+    public static class Arm {
+        public final static int ARM_MOTOR_ID = 0;
+        public final static int CURRENT_LIMIT = 25;
+    }
+    
+    public static class Elevator {
+        public final static int INTAKE_MOTOR_ID = 0;
+        public final static int CURRENT_LIMIT = 25;
+        public final static double INTAKE_SPEED = 1.0;
+        public final static double EJECT_SPEED = -1.0;
+        public final static double NEUTRAL_SPEED = 0.0;
+    }
+
     public static double PI = 3.14159265;
     public static double UPDATE_PERIOD = 0.010; // seconds
 

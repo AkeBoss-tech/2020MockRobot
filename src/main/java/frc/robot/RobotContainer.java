@@ -9,9 +9,11 @@ import frc.robot.util.SnailController;
 
 import java.util.ArrayList;
 
+import frc.robot.commands.Arm.ArmManualCommand;
 import frc.robot.commands.RollerIntake.IntakeEjectingCommand;
 import frc.robot.commands.RollerIntake.IntakeIntakingCommand;
 import frc.robot.commands.RollerIntake.IntakeNeutralCommand;
+import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.RollerIntake;
 
 import static frc.robot.Constants.ElectricalLayout.CONTROLLER_DRIVER_ID;
@@ -25,14 +27,17 @@ import static frc.robot.Constants.UPDATE_PERIOD;;
  * (including subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-
+    // Controllers
     private SnailController driveController;
     private SnailController operatorController;
     
     private ArrayList<SnailSubsystem> subsystems;
 
+    // Subsystems
     private RollerIntake rollerIntake;
+    private Arm arm;
 
+    // idk what this is
     private Notifier updateNotifier;
     private int outputCounter;
 
@@ -60,11 +65,19 @@ public class RobotContainer {
      */
     private void configureSubsystems() {
         // declare each of the subsystems here
+        // Roller Intake
         rollerIntake = new RollerIntake();
         rollerIntake.setDefaultCommand(new IntakeNeutralCommand(rollerIntake));
 
+        // Arm
+        arm = new Arm();
+        arm.setDefaultCommand(new ArmManualCommand(arm, () -> {
+            return operatorController.getLeftY();
+        }));
+
         subsystems = new ArrayList<>();
         subsystems.add(rollerIntake);
+        subsystems.add(arm);
         // add each of the subsystems to the arraylist here
     }
 
@@ -74,6 +87,7 @@ public class RobotContainer {
     private void configureButtonBindings() {
         operatorController.getButton(Button.kX.value).whileActiveOnce(new IntakeEjectingCommand(rollerIntake));
         operatorController.getButton(Button.kA.value).whileActiveOnce(new IntakeIntakingCommand(rollerIntake));
+        
     }
 
     /**
