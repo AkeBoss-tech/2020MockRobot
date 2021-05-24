@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 import frc.robot.commands.Arm.ArmManualCommand;
 import frc.robot.commands.Elevator.ElevatorManualCommand;
+import frc.robot.commands.Elevator.ElevatorPIDCommand;
 import frc.robot.commands.RollerIntake.IntakeEjectingCommand;
 import frc.robot.commands.RollerIntake.IntakeIntakingCommand;
 import frc.robot.commands.RollerIntake.IntakeNeutralCommand;
@@ -95,9 +96,16 @@ public class RobotContainer {
      * Define button -> command mappings.
      */
     private void configureButtonBindings() {
+        // Operator Controller
+        // Roller Intake
         operatorController.getButton(Button.kX.value).whileActiveOnce(new IntakeEjectingCommand(rollerIntake));
         operatorController.getButton(Button.kA.value).whileActiveOnce(new IntakeIntakingCommand(rollerIntake));
         
+        // Drive Controller
+        // Elevator
+        driveController.getButton(Button.kA.value).whileActiveOnce(new ElevatorPIDCommand(elevator, Constants.Elevator.TOP));
+        driveController.getButton(Button.kA.value).whileActiveOnce(new ElevatorPIDCommand(elevator, Constants.Elevator.DOWN));
+
     }
 
     /**

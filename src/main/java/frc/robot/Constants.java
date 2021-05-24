@@ -37,6 +37,19 @@ public final class Constants {
     public static class Elevator {
         public final static int ELEVATOR_MOTOR_ID = 0;
         public final static int CURRENT_LIMIT = 25;
+        // TODO Tune Constants
+
+        // PID
+        public static double[] ELEVATOR_PID = new double[] {0.1, 0, 0.01};
+        public static double ELEVATOR_PID_TOLERANCE = 0.1;
+        public static double ELEVATOR_PID_MAX_OUTPUT = 0.7;
+
+        // Encoder
+        public static double POSITION_CONVERSION_FACTOR = 48.0 * Math.PI * 6;
+        public static double VELOCITY_CONVERSION_FACTOR = 48.0 * Math.PI * 6 / 60;
+
+        public static double TOP = 12; // Represents the top of the elevator
+        public static double DOWN = 12; // Represents the top of the elevator
     }
 
     public static double PI = 3.14159265;
