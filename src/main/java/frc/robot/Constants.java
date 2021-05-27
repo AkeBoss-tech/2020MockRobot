@@ -10,9 +10,12 @@ package frc.robot;
  * 
  * Each subsystem should have its own static inner class to hold its constants
  */
+// TODO Tune Constants
+
 public final class Constants {
 
     public static class ElectricalLayout {
+        // Controller IDs
         public final static int CONTROLLER_DRIVER_ID = 0;
         public final static int CONTROLLER_OPERATOR_ID = 1;
     }
@@ -22,22 +25,42 @@ public final class Constants {
     }
 
     public static class Intake {
+        // Motor Setup
         public final static int INTAKE_MOTOR_ID = 0;
         public final static int CURRENT_LIMIT = 25;
+
+        // Motor Speeds
         public final static double INTAKE_SPEED = 1.0;
         public final static double EJECT_SPEED = -1.0;
         public final static double NEUTRAL_SPEED = 0.0;
     }
 
     public static class Arm {
+        // Motor Setup
         public final static int ARM_MOTOR_ID = 0;
         public final static int CURRENT_LIMIT = 25;
+
+        // Limit Switch
+        public final static int ARM_LIMIT_SWITCH_PORT_ID = 0;
+        
+        // PID
+        public static double[] ARM_PID = new double[] {0.1, 0, 0.01};
+        public static double ARM_PID_TOLERANCE = 0.1;
+        public static double ARM_PID_MAX_OUTPUT = 0.7;
+
+        // Encoder
+        public static double POSITION_CONVERSION_FACTOR = 48.0 * Math.PI * 6;
+        public static double VELOCITY_CONVERSION_FACTOR = 48.0 * Math.PI * 6 / 60;
+
+        // Positions
+        public static double TOP = 12; // Represents the top of the arm
+        public static double DOWN = 12; // Represents the bottom of the arm
     }
     
     public static class Elevator {
+        // Motor Setup
         public final static int ELEVATOR_MOTOR_ID = 0;
         public final static int CURRENT_LIMIT = 25;
-        // TODO Tune Constants
 
         // PID
         public static double[] ELEVATOR_PID = new double[] {0.1, 0, 0.01};
@@ -48,10 +71,12 @@ public final class Constants {
         public static double POSITION_CONVERSION_FACTOR = 48.0 * Math.PI * 6;
         public static double VELOCITY_CONVERSION_FACTOR = 48.0 * Math.PI * 6 / 60;
 
+        // Positions
         public static double TOP = 12; // Represents the top of the elevator
-        public static double DOWN = 12; // Represents the top of the elevator
+        public static double DOWN = 12; // Represents the bottom of the elevator
     }
 
+    // Miscellaneous
     public static double PI = 3.14159265;
     public static double UPDATE_PERIOD = 0.010; // seconds
 

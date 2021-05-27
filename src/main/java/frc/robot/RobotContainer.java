@@ -9,16 +9,21 @@ import frc.robot.util.SnailController;
 
 import java.util.ArrayList;
 
+// Commands
 import frc.robot.commands.Arm.ArmManualCommand;
+import frc.robot.commands.Arm.ArmPIDCommand;
 import frc.robot.commands.Elevator.ElevatorManualCommand;
 import frc.robot.commands.Elevator.ElevatorPIDCommand;
 import frc.robot.commands.RollerIntake.IntakeEjectingCommand;
 import frc.robot.commands.RollerIntake.IntakeIntakingCommand;
 import frc.robot.commands.RollerIntake.IntakeNeutralCommand;
+
+// Subsystems
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.RollerIntake;
 
+// Constants
 import static frc.robot.Constants.ElectricalLayout.CONTROLLER_DRIVER_ID;
 import static frc.robot.Constants.ElectricalLayout.CONTROLLER_OPERATOR_ID;
 import static frc.robot.Constants.UPDATE_PERIOD;;
@@ -85,6 +90,7 @@ public class RobotContainer {
             return operatorController.getRightY();
         }));
 
+        // Adding the subsystems to the list
         subsystems = new ArrayList<>();
         subsystems.add(rollerIntake);
         subsystems.add(arm);
@@ -98,12 +104,16 @@ public class RobotContainer {
     private void configureButtonBindings() {
         // Operator Controller
         // Roller Intake
-        operatorController.getButton(Button.kX.value).whileActiveOnce(new IntakeEjectingCommand(rollerIntake));
-        operatorController.getButton(Button.kA.value).whileActiveOnce(new IntakeIntakingCommand(rollerIntake));
+        operatorController.getButton(Button.kB.value).whileActiveOnce(new IntakeEjectingCommand(rollerIntake));
+        operatorController.getButton(Button.kX.value).whileActiveOnce(new IntakeIntakingCommand(rollerIntake));
         
+        // Arm (PID)
+        operatorController.getButton(Button.kY.value).whileActiveOnce(new ArmPIDCommand(arm, Constants.Arm.TOP));
+        operatorController.getButton(Button.kA.value).whileActiveOnce(new ArmPIDCommand(arm, Constants.Arm.DOWN));
+
         // Drive Controller
-        // Elevator
-        driveController.getButton(Button.kA.value).whileActiveOnce(new ElevatorPIDCommand(elevator, Constants.Elevator.TOP));
+        // Elevator (PID)
+        driveController.getButton(Button.kY.value).whileActiveOnce(new ElevatorPIDCommand(elevator, Constants.Elevator.TOP));
         driveController.getButton(Button.kA.value).whileActiveOnce(new ElevatorPIDCommand(elevator, Constants.Elevator.DOWN));
 
     }
