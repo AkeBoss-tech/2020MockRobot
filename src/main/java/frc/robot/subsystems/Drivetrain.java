@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpiutil.math.MathUtil;
-import frc.robot.commands.drivetrain.ToggleReverseCommand;
 import frc.robot.util.Gyro;
 
 import static frc.robot.Constants.*;
@@ -149,7 +148,24 @@ public class Drivetrain extends SnailSubsystem {
                 break;
             }
             case TURN: {
-              
+                if(angleSetpoint == defaultSetpoint) {
+                    state = defaultState;
+                    break;
+                }
+
+                // comment this out while initially tuning
+                if(anglePID.atSetpoint()) {
+                    state = defaultState;
+                    angleSetpoint = defaultSetpoint;
+                    break;
+                }
+
+                double turnOutput = anglePID.calculate(Gyro.getInstance().getRobotAngle(), angleSetpoint);
+                turnOutput = MathUtil.clamp(turnOutput, -DRIVE_ANGLE_MAX_OUTPUT, DRIVE_ANGLE_MAX_OUTPUT);
+
+                double[] arcadeSpeeds = arcadeDrive(0, turnOutput);
+                frontLeftMotor.set(arcadeSpeeds[0]);
+                frontRightMotor.set(arcadeSpeeds[1]);
                 break;
             }
         }
