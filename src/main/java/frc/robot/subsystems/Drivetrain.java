@@ -126,7 +126,26 @@ public class Drivetrain extends SnailSubsystem {
                 break;
             }
             case DRIVE_DIST: {
-               
+                if(distSetpoint == defaultSetpoint || angleSetpoint == defaultSetpoint) {
+                    state = defaultState;
+                    break;
+                }
+
+                // comment this out while initially tuning
+                if(distancePID.atSetpoint()) {
+                    state = defaultState;
+                    distSetpoint = defaultSetpoint;
+                    angleSetpoint = defaultSetpoint;
+                    break;
+                }
+
+                double forwardOutput = distancePID.calculate(leftEncoder.getPosition(), distSetpoint);
+                forwardOutput = MathUtil.clamp(forwardOutput, -DRIVE_DIST_MAX_OUTPUT, DRIVE_DIST_MAX_OUTPUT);
+                double turnOutput = (angleSetpoint - Gyro.getInstance().getRobotAngle()) * DRIVE_DIST_ANGLE_P;
+
+                double[] arcadeSpeeds = arcadeDrive(forwardOutput, turnOutput);
+                frontLeftMotor.set(arcadeSpeeds[0]);
+                frontRightMotor.set(arcadeSpeeds[1]);
                 break;
             }
             case TURN: {
@@ -214,6 +233,16 @@ public class Drivetrain extends SnailSubsystem {
 
     public void toggleSlowTurn() {
         slowTurn = !slowTurn;
+    }
+
+    public void endPID() {
+        distSetpoint = defaultSetpoint;
+        angleSetpoint = defaultSetpoint;
+        state = defaultState;
+    }
+
+    public State getState() {
+        return state;
     }
 
     @Override
