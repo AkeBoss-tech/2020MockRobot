@@ -1,11 +1,19 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.controller.PIDController;
+import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
+import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.wpiutil.math.MathUtil;
+import frc.robot.commands.drivetrain.ToggleReverseCommand;
+import frc.robot.util.Gyro;
 
 import static frc.robot.Constants.*;
 import static frc.robot.Constants.ElectricalLayout.*;
@@ -16,6 +24,9 @@ public class Drivetrain extends SnailSubsystem {
     private CANSparkMax frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor;
     private CANPIDController leftPID, rightPID;
     private PIDController distancePID, anglePID;
+    private CANEncoder leftEncoder, rightEncoder;
+
+    private DifferentialDriveKinematics driveKinematics;
 
     public enum State {
         MANUAL,
@@ -25,6 +36,12 @@ public class Drivetrain extends SnailSubsystem {
     }
     private State defaultState = State.MANUAL;
     private State state = defaultState;
+
+    private double distSetpoint; // current distance setpoint in meters
+    private double angleSetpoint; // current angle setpoint in deg
+
+    // default value for when the setpoint is not set. Deliberately set low to avoid skewing graphs
+    private final double defaultSetpoint = -1.257;
     
     private double speedForward;
     private double speedTurn;
@@ -33,7 +50,7 @@ public class Drivetrain extends SnailSubsystem {
     private boolean slowTurn;
 
     public Drivetrain() {
-        // motors
+        // Motors
         frontLeftMotor = new CANSparkMax(DRIVE_FRONT_LEFT, MotorType.kBrushless);
         frontRightMotor = new CANSparkMax(DRIVE_FRONT_RIGHT, MotorType.kBrushless);
         backLeftMotor = new CANSparkMax(DRIVE_BACK_LEFT, MotorType.kBrushless);
@@ -57,7 +74,26 @@ public class Drivetrain extends SnailSubsystem {
         backLeftMotor.follow(frontLeftMotor);
         backRightMotor.follow(frontRightMotor);
 
+        // Encoders
+        leftEncoder = frontLeftMotor.getEncoder();
+        rightEncoder = frontRightMotor.getEncoder();
 
+        leftEncoder.setPositionConversionFactor(Math.PI * DRIVE_WHEEL_DIAM_M / DRIVE_GEARBOX_REDUCTION);
+        rightEncoder.setPositionConversionFactor(Math.PI * DRIVE_WHEEL_DIAM_M / DRIVE_GEARBOX_REDUCTION);
+        leftEncoder.setVelocityConversionFactor(Math.PI * DRIVE_WHEEL_DIAM_M / DRIVE_GEARBOX_REDUCTION / 60.0);
+        rightEncoder.setVelocityConversionFactor(Math.PI * DRIVE_WHEEL_DIAM_M / DRIVE_GEARBOX_REDUCTION / 60.0);
+        
+        leftEncoder.setPosition(0);
+        rightEncoder.setPosition(0);
+        
+        // Controllers
+        leftPID = frontLeftMotor.getPIDController();
+        rightPID = frontRightMotor.getPIDController();
+
+        leftPID.setP(DRIVE_VEL_LEFT_P, DRIVE_VEL_SLOT);
+        leftPID.setFF(DRIVE_VEL_LEFT_F, DRIVE_VEL_SLOT);
+        rightPID.setP(DRIVE_VEL_RIGHT_P, DRIVE_VEL_SLOT);
+        rightPID.setFF(DRIVE_VEL_RIGHT_F, DRIVE_VEL_SLOT);
     }
 
     private void reset() {
@@ -77,15 +113,26 @@ public class Drivetrain extends SnailSubsystem {
                 frontRightMotor.set(arcadeSpeeds[1]);
                 break;
             }
-            case VELOCITY:
+            case VELOCITY: {
+                double adjustedSpeedForward = reversed ? -speedForward : speedForward;
+                double adjustedSpeedTurn = slowTurn ? speedTurn * DRIVE_SLOW_TURN_MULT : speedTurn;
 
-                break;
-            case DRIVE_DIST:
+                // apply negative sign to turn speed because WPILib uses left as positive
+                ChassisSpeeds chassisSpeeds = new ChassisSpeeds(adjustedSpeedForward, 0, Math.toRadians(-adjustedSpeedTurn));
+                DifferentialDriveWheelSpeeds wheelSpeeds = driveKinematics.toWheelSpeeds(chassisSpeeds);
 
+                leftPID.setReference(wheelSpeeds.leftMetersPerSecond, ControlType.kVelocity, DRIVE_VEL_SLOT);
+                rightPID.setReference(wheelSpeeds.rightMetersPerSecond, ControlType.kVelocity, DRIVE_VEL_SLOT);
                 break;
-            case TURN:
-
+            }
+            case DRIVE_DIST: {
+               
                 break;
+            }
+            case TURN: {
+              
+                break;
+            }
         }
     }
 
@@ -131,6 +178,43 @@ public class Drivetrain extends SnailSubsystem {
 
         state = State.MANUAL;
 	}
+
+    public void velocityDrive(double speedForward, double speedTurn) {
+        this.speedForward = speedForward;
+        this.speedTurn = speedTurn;
+
+        defaultState = State.VELOCITY;
+        state = State.VELOCITY;
+    }
+
+    public void driveDistance(double distance) {
+        leftEncoder.setPosition(0);
+        rightEncoder.setPosition(0);
+        Gyro.getInstance().zeroRobotAngle();
+        
+        distSetpoint = distance;
+        angleSetpoint = 0;
+        distancePID.reset();
+
+        state = State.DRIVE_DIST;
+    }
+
+    public void turnAngle(double angle) {
+        Gyro.getInstance().zeroRobotAngle();
+
+        angleSetpoint = angle;
+        anglePID.reset();
+
+        state = State.TURN;
+    }
+
+    public void toggleReverse() {
+        reversed = !reversed;
+    }
+
+    public void toggleSlowTurn() {
+        slowTurn = !slowTurn;
+    }
 
     @Override
     public void displayShuffleboard() {
