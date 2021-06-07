@@ -28,7 +28,7 @@ public final class Constants {
     }
 
     public static class Drivetrain {
-
+        public static double DRIVE_SLOW_TURN_MULT = 0.45;
     }
 
     public static double PI = 3.14159265;

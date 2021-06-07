@@ -13,13 +13,8 @@ import static frc.robot.Constants.Drivetrain.*;
 
 public class Drivetrain extends SnailSubsystem {
 
-    private CANSparkMax frontLeftMotor;
-    private CANSparkMax frontRightMotor;
-    private CANSparkMax backLeftMotor;
-    private CANSparkMax backRightMotor;
-    
+    private CANSparkMax frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor;
     private CANPIDController leftPID, rightPID;
-    
     private PIDController distancePID, anglePID;
 
     public enum State {
@@ -66,14 +61,22 @@ public class Drivetrain extends SnailSubsystem {
     }
 
     private void reset() {
-
+        state = defaultState;
+        reversed = false;
+        slowTurn = false;
     }
 
     public void update() {
         switch (state) {
-            case MANUAL:
-
+            case MANUAL: {
+                double adjustedSpeedForward = reversed ? -speedForward : speedForward;
+                double adjustedSpeedTurn = slowTurn ? speedTurn * DRIVE_SLOW_TURN_MULT : speedTurn;
+              
+                double[] arcadeSpeeds = arcadeDrive(adjustedSpeedForward, adjustedSpeedTurn);
+                frontLeftMotor.set(arcadeSpeeds[0]);
+                frontRightMotor.set(arcadeSpeeds[1]);
                 break;
+            }
             case VELOCITY:
 
                 break;
@@ -85,6 +88,49 @@ public class Drivetrain extends SnailSubsystem {
                 break;
         }
     }
+
+    public double[] arcadeDrive(double speedForward, double speedTurn) {
+        double forward = Math.copySign(speedForward * speedForward, speedForward);
+        double turn = Math.copySign(speedTurn * speedTurn, speedTurn);
+
+        if (Math.abs(forward) < 0.02) forward = 0.0;
+        if (Math.abs(turn) < 0.02) turn = 0.0;
+
+        double maxInput = Math.copySign(Math.max(Math.abs(forward), Math.abs(turn)), forward);
+        
+        double speedLeft;
+        double speedRight;
+
+        if (forward >= 0.0) {
+            if (turn >= 0.0) {
+                speedLeft = maxInput;
+                speedRight = forward - turn;
+            }
+            else {
+                speedLeft = forward + turn;
+                speedRight = maxInput;
+            }
+        } 
+        else {
+            if (turn >= 0.0) {
+                speedLeft = forward + turn;
+                speedRight = maxInput;
+            }
+            else {
+                speedLeft = maxInput;
+                speedRight = forward - turn;
+            }
+        }
+
+        return new double[] {speedLeft, speedRight};
+    }
+
+    public void manualDrive(double speedForward, double speedTurn) {
+        this.speedForward = speedForward;
+        this.speedTurn = speedTurn;
+
+        state = State.MANUAL;
+	}
 
     @Override
     public void displayShuffleboard() {
