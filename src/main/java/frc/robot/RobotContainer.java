@@ -4,6 +4,10 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.commands.drivetrain.ManualDriveCommand;
+import frc.robot.commands.drivetrain.ToggleReverseCommand;
+import frc.robot.commands.drivetrain.ToggleSlowTurnCommand;
+import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.SnailSubsystem;
 import frc.robot.util.SnailController;
 
@@ -45,6 +49,7 @@ public class RobotContainer {
     private RollerIntake rollerIntake;
     private Arm arm;
     private Elevator elevator;
+    private Drivetrain drivetrain;
 
     // idk what this is
     private Notifier updateNotifier;
@@ -90,12 +95,18 @@ public class RobotContainer {
             return operatorController.getRightY();
         }));
 
+        drivetrain = new Drivetrain();
+        drivetrain.setDefaultCommand(new ManualDriveCommand(drivetrain, driveController::getDriveForward,
+            driveController::getDriveTurn));
+
         // Adding the subsystems to the list
         subsystems = new ArrayList<>();
         subsystems.add(rollerIntake);
         subsystems.add(arm);
         subsystems.add(elevator);
         // add each of the subsystems to the arraylist here
+
+        subsystems.add(drivetrain);
     }
 
     /**
@@ -113,9 +124,11 @@ public class RobotContainer {
 
         // Drive Controller
         // Elevator (PID)
-        driveController.getButton(Button.kY.value).whileActiveOnce(new ElevatorPIDCommand(elevator, Constants.Elevator.TOP));
-        driveController.getButton(Button.kA.value).whileActiveOnce(new ElevatorPIDCommand(elevator, Constants.Elevator.DOWN));
+        operatorController.getButton(Button.kStart.value).whileActiveOnce(new ElevatorPIDCommand(elevator, Constants.Elevator.TOP));
+        operatorController.getButton(Button.kBack.value).whileActiveOnce(new ElevatorPIDCommand(elevator, Constants.Elevator.DOWN));
 
+        driveController.getButton(Button.kStart.value).whenPressed(new ToggleReverseCommand(drivetrain));
+        driveController.getButton(Button.kBack.value).whenPressed(new ToggleSlowTurnCommand(drivetrain));
     }
 
     /**
