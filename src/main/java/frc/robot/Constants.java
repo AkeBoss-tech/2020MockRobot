@@ -18,6 +18,13 @@ public final class Constants {
         // Controller IDs
         public final static int CONTROLLER_DRIVER_ID = 0;
         public final static int CONTROLLER_OPERATOR_ID = 1;
+
+        public final static int ARM_MOTOR_ID = 0;
+        public final static int ARM_LIMIT_SWITCH_PORT_ID = 0;
+
+        public final static int INTAKE_MOTOR_ID = 0;
+        
+        public final static int ELEVATOR_MOTOR_ID = 0;
     }
 
     public static class Autonomous {
@@ -25,24 +32,13 @@ public final class Constants {
     }
 
     public static class Intake {
-        // Motor Setup
-        public final static int INTAKE_MOTOR_ID = 0;
-        public final static int CURRENT_LIMIT = 25;
-
         // Motor Speeds
         public final static double INTAKE_SPEED = 1.0;
         public final static double EJECT_SPEED = -1.0;
         public final static double NEUTRAL_SPEED = 0.0;
     }
 
-    public static class Arm {
-        // Motor Setup
-        public final static int ARM_MOTOR_ID = 0;
-        public final static int CURRENT_LIMIT = 25;
-
-        // Limit Switch
-        public final static int ARM_LIMIT_SWITCH_PORT_ID = 0;
-        
+    public static class Arm {       
         // PID
         public static double[] ARM_PID = new double[] {0.1, 0, 0.01};
         public static double ARM_PID_TOLERANCE = 0.1;
@@ -58,10 +54,6 @@ public final class Constants {
     }
     
     public static class Elevator {
-        // Motor Setup
-        public final static int ELEVATOR_MOTOR_ID = 0;
-        public final static int CURRENT_LIMIT = 25;
-
         // PID
         public static double[] ELEVATOR_PID = new double[] {0.1, 0, 0.01};
         public static double ELEVATOR_PID_TOLERANCE = 0.1;
@@ -80,4 +72,5 @@ public final class Constants {
     public static double PI = 3.14159265;
     public static double UPDATE_PERIOD = 0.010; // seconds
 
+    public final static int NEO_CURRENT_LIMIT = 25;
 }

@@ -9,7 +9,10 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.Constants;
+
+import static frc.robot.Constants.ElectricalLayout.*;
+import static frc.robot.Constants.Arm.*;
+import static frc.robot.Constants.*;
 
 public class Arm extends SnailSubsystem {
     // Declaring Motor related things
@@ -17,44 +20,42 @@ public class Arm extends SnailSubsystem {
     private CANEncoder armEncoder;
     private CANPIDController armPID;
 
-    public enum States {
-        Manual,
-        Autonomous,
+    public enum State {
+        MANUAL,
+        AUTO,
         PID
     }
+    public State state = State.MANUAL; // Might wanna change this later to start on autonomous
 
     // Limit switch
-    DigitalInput limitSwitchBottom;
+    private DigitalInput limitSwitchBottom;
 
-    public States state;
     private double speed;
     private double setpoint;
 
     public Arm() {
         // Setting the motor
-        armMotor = new CANSparkMax(Constants.Arm.ARM_MOTOR_ID, MotorType.kBrushless);
+        armMotor = new CANSparkMax(ARM_MOTOR_ID, MotorType.kBrushless);
         armMotor.restoreFactoryDefaults();
         armMotor.setIdleMode(IdleMode.kBrake);
-        armMotor.setSmartCurrentLimit(Constants.Arm.CURRENT_LIMIT);
+        armMotor.setSmartCurrentLimit(NEO_CURRENT_LIMIT);
 
         // Setting the encoder
         armEncoder = armMotor.getEncoder();
-        armEncoder.setPositionConversionFactor(Constants.Arm.POSITION_CONVERSION_FACTOR); // The constant that you multiply that will tell you the distance the elevator goes up
-        armEncoder.setVelocityConversionFactor(Constants.Arm.VELOCITY_CONVERSION_FACTOR); // The constant that you multiply that will tell you the velocity the elevator has in relation to the motor
+        armEncoder.setPositionConversionFactor(POSITION_CONVERSION_FACTOR); // The constant that you multiply that will tell you the distance the elevator goes up
+        armEncoder.setVelocityConversionFactor(VELOCITY_CONVERSION_FACTOR); // The constant that you multiply that will tell you the velocity the elevator has in relation to the motor
 
         // Arm PID
         armPID = armMotor.getPIDController();
-        armPID.setP(Constants.Arm.ARM_PID[0]);
-        armPID.setI(Constants.Arm.ARM_PID[1]);
-        armPID.setD(Constants.Arm.ARM_PID[2]);
-        armPID.setOutputRange(-Constants.Arm.ARM_PID_MAX_OUTPUT, Constants.Arm.ARM_PID_MAX_OUTPUT);
-
+        armPID.setP(ARM_PID[0]);
+        armPID.setI(ARM_PID[1]);
+        armPID.setD(ARM_PID[2]);
+        armPID.setOutputRange(-ARM_PID_MAX_OUTPUT, ARM_PID_MAX_OUTPUT);
 
         // Limit switch
-        limitSwitchBottom = new DigitalInput(Constants.Arm.ARM_LIMIT_SWITCH_PORT_ID); // port defined in Constants
+        limitSwitchBottom = new DigitalInput(ARM_LIMIT_SWITCH_PORT_ID); // port defined in Constants
 
         // Setting the variables
-        state = States.Manual; // Might wanna change this later to start on autonomous
         speed = 0;
     }
 
@@ -65,43 +66,41 @@ public class Arm extends SnailSubsystem {
         }
 
         switch (state) {
-            case Manual:
+            case MANUAL:
                 armMotor.set(speed);
                 break;
-            case Autonomous:
+            case AUTO:
                 break;
             case PID:
                 armPID.setReference(setpoint, ControlType.kPosition);
 
                 // check our error and update the state if we finish
-                if(Math.abs(armEncoder.getPosition() - setpoint) < Constants.Arm.ARM_PID_TOLERANCE) {
-                    state = States.Manual;
+                if(Math.abs(armEncoder.getPosition() - setpoint) < ARM_PID_TOLERANCE) {
+                    state = State.MANUAL;
                 }
-            
                 break;
-                
             default:
                 break;
         }
     }
 
-    public void setSpeed(double _speed) {
-        speed = _speed;
-        state = States.Manual;
+    public void setSpeed(double speed) {
+        this.speed = speed;
+        state = State.MANUAL;
     }
 
-    public States getState() {
+    public State getState() {
         return state;
     }
 
 
     public void setPosition(double setpoint) {
-        state = States.PID;
+        state = State.PID;
         this.setpoint = setpoint;
     }
 
     public void endPID() {
-        state = States.Manual;
+        state = State.MANUAL;
     }
 
 	@Override

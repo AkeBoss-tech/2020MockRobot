@@ -29,7 +29,7 @@ public class ArmPIDCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return arm.getState() != Arm.States.PID;
+        return arm.getState() != Arm.State.PID;
     }
 
 }

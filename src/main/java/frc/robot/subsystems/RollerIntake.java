@@ -3,7 +3,10 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import frc.robot.Constants;
+
+import static frc.robot.Constants.ElectricalLayout.*;
+import static frc.robot.Constants.Intake.*;
+import static frc.robot.Constants.*;
 
 public class RollerIntake extends SnailSubsystem {
 
@@ -12,23 +15,22 @@ public class RollerIntake extends SnailSubsystem {
         EJECTING,
         NEUTRAL
     }
-
-    State state = State.NEUTRAL;
+    public State state = State.NEUTRAL;
 
     private CANSparkMax intakeMotor;
 
     public RollerIntake() {
-        intakeMotor = new CANSparkMax(Constants.Intake.INTAKE_MOTOR_ID, MotorType.kBrushless);
+        intakeMotor = new CANSparkMax(INTAKE_MOTOR_ID, MotorType.kBrushless);
         intakeMotor.restoreFactoryDefaults();
         intakeMotor.setIdleMode(IdleMode.kBrake);
-        intakeMotor.setSmartCurrentLimit(Constants.Intake.CURRENT_LIMIT);
+        intakeMotor.setSmartCurrentLimit(NEO_CURRENT_LIMIT);
     }
 
     @Override
     public void update() {
         switch (state) {
             case INTAKING:
-                intakeMotor.set(Constants.Intake.INTAKE_SPEED);
+                intakeMotor.set(INTAKE_SPEED);
                 break;
             case EJECTING:
                 intakeMotor.set(-1.0);
